@@ -1,0 +1,44 @@
+[
+  {
+    "productDescription": "Gloves 24PCS",
+    "stock": 24,
+    "price": 4.55,
+    "productNumber": "231027-01",
+    "display": true
+  },
+  {
+    "productDescription": "M3-0.5x10mm Pan Head Screw",
+    "stock": 25000,
+    "price": 0.02,
+    "productNumber": "232027-02",
+    "display": true
+  },
+  {
+    "productDescription": "M3-0.5x15mm Pan Head Screw",
+    "stock": 25000,
+    "price": 0.02,
+    "productNumber": "232027-03",
+    "display": true
+  },
+  {
+    "productDescription": "M3-0.5x20mm Pan Head Screw",
+    "stock": 25000,
+    "price": 0.02,
+    "productNumber": "232027-04",
+    "display": true
+  },
+  {
+    "productDescription": "M3-0.5x25mm Pan Head Screw",
+    "stock": 25000,
+    "price": 0.02,
+    "productNumber": "232027-05",
+    "display": true
+  },
+  {
+    "productDescription": "M3-0.5x3.5mm Hex Nut",
+    "stock": 25000,
+    "price": 0.02,
+    "productNumber": "232027-06",
+    "display": true
+  }
+]

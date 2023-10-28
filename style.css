@@ -1,0 +1,50 @@
+* {
+    font-family: -apple-system,BlinkMacSystemFont,segoe ui,Roboto,Oxygen,Ubuntu,Cantarell,open sans,helvetica neue,sans-serif;
+}
+
+body{
+    width: 60%;
+    margin:auto;
+}
+
+h1{
+    margin-bottom:0;
+}
+
+button{
+    margin-top:1em;
+    border-color: transparent;
+    border-radius: 0.5em;
+}
+
+.headerSection{
+    border-spacing:1em;
+    background-color: rgb(240, 234, 214);
+    margin-top: 1em;
+    border-radius: 1em 1em 0em 0em;
+    width: 100%;
+    padding-left: 1em;
+}
+
+#vendingContent{
+    width: 100%;
+    border-spacing:1em;
+    background-color: rgb(240, 234, 214);
+    border-radius: 0em 0em 1em 1em;
+    margin-bottom: 1em;
+    
+}
+
+#vendingContent td {
+    background-color: rgb(46, 46, 51);
+    border-radius: 1em;
+    width: 100;
+    padding:1em;
+    color:white;
+    word-break: break-all;
+}
+
+p{
+    margin:0;
+    font-size: 12px;
+}
