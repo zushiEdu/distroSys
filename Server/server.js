@@ -67,11 +67,14 @@ try {
                         response.write(JSON.stringify({ error: '4-- user already exists.' }));
                         console.log("Error 4-- user already exists.");
                     }
-                    response.end();
+
                 });
+            } else {
+                response.write(JSON.stringify({ error: '4-- invalid query.' }));
+                console.log("Error 4-- invalid query.");
             }
         }
-        console.log("-----");
+        console.log("--------------------");
     }).listen(config.webAppAccessPort);
 } catch (e) {
     console.log("Error", e);
