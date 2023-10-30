@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "command": "node",
+  "tasks": [
+    {
+      "label": "server",
+      "args": ["server.js"],
+      "options": {
+        "cwd": "${workspaceFolder}/Server/",
+        "statusbar": {
+          "hide": false
+        }
+      }
+    }
+  ]
+}
