@@ -45,8 +45,8 @@ try {
                         }
                     } else {
                         // send back 4-- code and log error if user is not authenticated
-                        response.write(JSON.stringify({ error: '4-- User not verified.' }));
-                        console.log("Error 4-- User not verified.");
+                        response.write(JSON.stringify({ error: '401 User not verified.' }));
+                        console.log("Error 401 User not verified.");
                     }
                     response.end();
                 });
@@ -64,14 +64,14 @@ try {
                         response.write(JSON.stringify({ key: `${key}` }));
                     } else {
                         // send back 4-- code and log error if a user with same username is already signed up for key
-                        response.write(JSON.stringify({ error: '4-- user already exists.' }));
-                        console.log("Error 4-- user already exists.");
+                        response.write(JSON.stringify({ error: '403 user already exists.' }));
+                        console.log("Error 403 user already exists.");
                     }
 
                 });
             } else {
-                response.write(JSON.stringify({ error: '4-- invalid query.' }));
-                console.log("Error 4-- invalid query.");
+                response.write(JSON.stringify({ error: '406 invalid query.' }));
+                console.log("Error 406 invalid query.");
             }
         }
         console.log("--------------------");
