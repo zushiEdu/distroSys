@@ -13,6 +13,9 @@ var config = require("./config.json");
 // log config
 console.log("Config:", config);
 
+// stack of robot tasks
+var stack = [];
+
 try {
     // create server for webApp on port based on config file designation
     http.createServer(function (request, response) {
@@ -42,7 +45,9 @@ try {
                                 response.write(JSON.stringify(returnedProduct, null, 4));
                                 console.log("Returned product:", returnedProduct.productNumber);
                                 console.log("Operation:", query.operation, "product, dispatching bot.");
-                                // send signal to dispatch bot here
+                                // send signal to dispatch bot here by adding task to stack
+                                stack.push({ get: query.sku });
+                                console.log("Stack", stack);
                             } else {
                                 // send back 400 code and log error if sku is not found
                                 response.statusCode = 400;
@@ -51,7 +56,7 @@ try {
                             }
                         }
                     } else {
-                        // send back 4-- code and log error if user is not authenticated
+                        // send back 401 code and log error if user is not authenticated
                         response.write(JSON.stringify({ error: '401 User not verified.' }));
                         console.log("Error 401 User not verified.");
                     }
@@ -70,11 +75,10 @@ try {
                         console.log("User", query.user, "signed up for new key.");
                         response.write(JSON.stringify({ key: `${key}` }));
                     } else {
-                        // send back 4-- code and log error if a user with same username is already signed up for key
+                        // send back 403 code and log error if a user with same username is already signed up for key
                         response.write(JSON.stringify({ error: '403 user already exists.' }));
                         console.log("Error 403 user already exists.");
                     }
-
                 });
             } else {
                 response.write(JSON.stringify({ error: '406 invalid query.' }));
@@ -107,4 +111,17 @@ function verifyUser(users, username, key) {
         }
     }
     return false;
+}
+
+function readDataFromFile(path, _callback) {
+    fs.readFile(path, 'utf8', function (err, data) {
+        _callback;
+        return data;
+    });
+    return null;
+}
+
+function writeDataToFile(path, data, _callback) {
+    fs.writeFile(path, data, 'utf8', function (err, data) { });
+    _callback;
 }
