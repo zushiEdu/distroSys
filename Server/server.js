@@ -17,6 +17,7 @@ try {
     // create server for webApp on port based on config file designation
     http.createServer(function (request, response) {
         // set content type
+        response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5500')
         response.writeHead(200, { 'Content-Type': 'application/json' });
         if (request.url === '/favicon.ico') {
             // ignore favicon requests
@@ -25,23 +26,29 @@ try {
             var query = url.parse(request.url, true).query;
             console.log("URL Query:", query);
             // change modes based on operation provided
-            if (query.operation == "get" || query.operation == "return") {
+            if (query.operation == "get" || query.operation == "return" || query.operation == "load") {
                 fs.readFile('./users.json', 'utf8', function (err, users) {
                     users = JSON.parse(users);
                     // verify user based on username and key
                     if (verifyUser(users, query.user, query.key)) {
-                        var returnedProduct = product.getProduct(query.sku);
-                        // look for sku in database, return object if sku is matching
-                        if (returnedProduct != undefined) {
-                            response.write(JSON.stringify(returnedProduct, null, 4));
-                            console.log("Returned product:", returnedProduct.productNumber);
-                            console.log("Operation:", query.operation, "product, dispatching bot.");
-                            // send signal to dispatch bot here
+                        if (query.operation == "load") {
+                            var loadedProducts = product.getProducts();
+                            response.write(JSON.stringify(loadedProducts, null, 4));
+                            console.log("Returned Catalog with", loadedProducts.length, "products in it.");
                         } else {
-                            // send back 400 code and log error if sku is not found
-                            response.statusCode = 400;
-                            response.write(JSON.stringify({ error: '400 Sku not found' }));
-                            console.log("Error 400: Sku not found");
+                            var returnedProduct = product.getProduct(query.sku);
+                            // look for sku in database, return object if sku is matching
+                            if (returnedProduct != undefined) {
+                                response.write(JSON.stringify(returnedProduct, null, 4));
+                                console.log("Returned product:", returnedProduct.productNumber);
+                                console.log("Operation:", query.operation, "product, dispatching bot.");
+                                // send signal to dispatch bot here
+                            } else {
+                                // send back 400 code and log error if sku is not found
+                                response.statusCode = 400;
+                                response.write(JSON.stringify({ error: '400 Sku not found' }));
+                                console.log("Error 400: Sku not found");
+                            }
                         }
                     } else {
                         // send back 4-- code and log error if user is not authenticated

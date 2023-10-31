@@ -7,3 +7,7 @@ exports.getProduct = function (sku) {
         }
     }
 }
+
+exports.getProducts = function () {
+    return proudctsList;
+}

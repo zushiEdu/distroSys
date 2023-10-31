@@ -17,7 +17,11 @@ function updateAccountProperties() {
     this.document.getElementById("balance").textContent = "Balance: $" + Math.round(accountCredit * 100) / 100;
 }
 
-fetch('products.json')
+var user = 'ehuber';
+var key = 'cd290b3330f20ab30f79d145eae869aecf61f32d2f63d6264e31128334584dfa';
+var port = 720;
+
+fetch(`http://localhost:${port}/?&user=${user}&key=${key}&operation=load`)
     .then(response => response.json())
     .then(products => {
         loadedProducts = products;
