@@ -1,0 +1,16 @@
+[
+    {
+        "productDescription": "I1",
+        "stock": 1,
+        "price": 1,
+        "productNumber": 1,
+        "display": true
+    },
+    {
+        "productDescription": "I2",
+        "stock": 1,
+        "price": 1,
+        "productNumber": 2,
+        "display": true
+    }
+]

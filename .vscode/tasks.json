@@ -3,8 +3,18 @@
   "command": "node",
   "tasks": [
     {
-      "label": "server",
-      "args": ["server.js"],
+      "label": "productServer",
+      "args": ["productServer.js"],
+      "options": {
+        "cwd": "${workspaceFolder}/Server/",
+        "statusbar": {
+          "hide": false
+        }
+      }
+    },
+    {
+      "label": "robotServer",
+      "args": ["robotServer.js"],
       "options": {
         "cwd": "${workspaceFolder}/Server/",
         "statusbar": {

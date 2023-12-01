@@ -1,53 +1,114 @@
 // libraries
-var http = require('http');
-var url = require('url');
-var crypto = require('crypto');
-var fs = require('fs');
+const http = require('http');
+const url = require('url');
+const crypto = require('crypto');
+const fs = require('fs');
+const productData = require('./productData');
+const orderData = require('./orderData');
+const order = require('./order');
+const product = require('./product');
+const task = require('./task');
+const reader = require('./fileReading');
 
 // modules
-var product = require('./product')
+let pD = new productData('./Data/products.json');
+let stackData = new reader('./Data/stack.json');
+let oD = new orderData('./Data/orders.json');
+
+// orderData.writeDataToFile(new order(1, [new product("1", 1, 1, 1, true, 1), new product("2", 2, 2, 2, true, 2)]));
+
+
+let tempData = new reader('./Data/products.json');
+tempData.writeDataToFile([new product("I1", 1, 1, 1, true, 1), new product("I2", 1, 1, 2, true)]);
+
 
 // data
-var config = require("./config.json");
+var config = require("./Data/config.json");
 
 // log config
 console.log("Config:", config);
+console.log("\n");
 
 // stack of robot tasks
 var stack = [];
 
+var orders = [];
+var orderCounter = 0;
+
 try {
     // create server for webApp on port based on config file designation
     http.createServer(function (request, response) {
+        pD.readProducts();
+        oD.readOrders();
+
         // set content type
         response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5500')
         response.writeHead(200, { 'Content-Type': 'application/json' });
         if (request.url === '/favicon.ico') {
             // ignore favicon requests
         } else {
+            stackData.readDataFromFile(function (data) {
+                stack = data;
+                // console.log(stack);
+            });
+
             // query url for params
             var query = url.parse(request.url, true).query;
             console.log("URL Query:", query);
             // change modes based on operation provided
-            if (query.operation == "get" || query.operation == "return" || query.operation == "load") {
-                fs.readFile('./users.json', 'utf8', function (err, users) {
+            if (query.operation == "request" || query.operation == "load") {
+                fs.readFile('./Data/users.json', 'utf8', function (err, users) {
                     users = JSON.parse(users);
                     // verify user based on username and key
                     if (verifyUser(users, query.user, query.key)) {
                         if (query.operation == "load") {
-                            var loadedProducts = product.getProducts();
+                            var loadedProducts = pD.getProducts();
                             response.write(JSON.stringify(loadedProducts, null, 4));
                             console.log("Returned Catalog with", loadedProducts.length, "products in it.");
                         } else {
-                            var returnedProduct = product.getProduct(query.sku);
+                            var returnedProduct = pD.getProduct(query.sku);
                             // look for sku in database, return object if sku is matching
                             if (returnedProduct != undefined) {
-                                response.write(JSON.stringify(returnedProduct, null, 4));
-                                console.log("Returned product:", returnedProduct.productNumber);
+                                // post product request
+
+                                console.log("Returned Product", returnedProduct);
+
+                                // console.log("Order:", query.order);
+                                if (query.order != null && query.order != undefined) {
+                                    if (!checkForOrder(query.order)) {
+                                        // order does not exist, create new order
+                                        var newOrder = new order(query.order);
+                                        newOrder.post();
+                                        newOrder.addProduct(returnedProduct);
+
+                                        oD.addOrder(newOrder);
+
+                                        orderCounter++;
+                                        console.log("New Order Created");
+                                    } else {
+                                        console.log(oD.getOrder(query.order))
+                                        console.log(returnedProduct)
+                                        // order does exist, add product to order
+                                        oD.getOrder(query.order).addProduct(returnedProduct);
+                                    }
+                                } else {
+                                    response.write(JSON.stringify({ error: '400 Order Not Given' }));
+                                    console.log("Error 400: Order Not Given")
+                                }
+
+                                oD.writeDataToFile();
+
+                                console.log(returnedProduct.getProductNumber);
+                                console.log("Returned product ID:", returnedProduct.getProductNumber());
                                 console.log("Operation:", query.operation, "product, dispatching bot.");
                                 // send signal to dispatch bot here by adding task to stack
-                                stack.push({ get: query.sku });
-                                console.log("Stack", stack);
+                                // console.log(pD.getProduct(query.sku).getLpn());
+                                var newTask = new task(query.sku, stack.counter);
+                                stack.stack.push(newTask);
+                                // console.log("Stack", stack);
+                                stack.counter++;
+                                stackData.writeDataToFile(stack, null);
+                                response.write(JSON.stringify(returnedProduct, null, 4));
                             } else {
                                 // send back 400 code and log error if sku is not found
                                 response.statusCode = 400;
@@ -113,15 +174,9 @@ function verifyUser(users, username, key) {
     return false;
 }
 
-function readDataFromFile(path, _callback) {
-    fs.readFile(path, 'utf8', function (err, data) {
-        _callback;
-        return data;
-    });
-    return null;
-}
-
-function writeDataToFile(path, data, _callback) {
-    fs.writeFile(path, data, 'utf8', function (err, data) { });
-    _callback;
+function checkForOrder(number) {
+    if (oD.getOrder(number) == null) {
+        return false;
+    }
+    return true;
 }
