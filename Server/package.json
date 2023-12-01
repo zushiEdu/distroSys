@@ -1,5 +1,14 @@
 {
   "name": "distro-sys",
   "version": "0.0.1",
-  "author": "Ethan Huber <etho8325@gmail.com>"
+  "author": "Ethan Huber <etho8325@gmail.com>",
+  "dependencies": {
+    "typescript": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.1",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.54.0"
+  }
 }
