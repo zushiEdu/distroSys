@@ -1,4 +1,10 @@
-class product {
+export class product {
+    productDescription: string;
+    stock: number;
+    price: number;
+    productNumber: number;
+    display: boolean;
+
     constructor(productDescription, stock, price, productNumber, display) {
         this.productDescription = productDescription;
         this.stock = stock;
@@ -43,5 +49,3 @@ class product {
         return this.productNumber;
     }
 }
-
-module.exports = product;

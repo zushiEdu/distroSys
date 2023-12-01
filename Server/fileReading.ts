@@ -1,6 +1,8 @@
 var fs = require('fs');
 
-class fileReader {
+export class fileReader {
+    path: string;
+
     constructor(path) {
         this.path = path;
     }
@@ -29,5 +31,3 @@ class fileReader {
         });
     }
 }
-
-module.exports = fileReader;

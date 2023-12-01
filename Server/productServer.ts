@@ -1,25 +1,28 @@
 // libraries
-const http = require('http');
-const url = require('url');
-const crypto = require('crypto');
-const fs = require('fs');
-const productData = require('./productData');
-const orderData = require('./orderData');
-const order = require('./order');
-const product = require('./product');
-const task = require('./task');
-const reader = require('./fileReading');
+import http from 'http';
+import url from 'url';
+import crypto from 'crypto';
+import fs from 'fs';
+import { productData } from './productData';
+import { orderData } from './orderData';
+import { order } from './order';
+import { product } from './product';
+import { task } from './task';
+import { fileReader } from './fileReading';
+import { stack, user } from './types';
 
 // modules
 let pD = new productData('./Data/products.json');
-let stackData = new reader('./Data/stack.json');
+let stackData = new fileReader('./Data/stack.json');
 let oD = new orderData('./Data/orders.json');
 
 // orderData.writeDataToFile(new order(1, [new product("1", 1, 1, 1, true, 1), new product("2", 2, 2, 2, true, 2)]));
 
 
-let tempData = new reader('./Data/products.json');
-tempData.writeDataToFile([new product("I1", 1, 1, 1, true, 1), new product("I2", 1, 1, 2, true)]);
+let tempData = new fileReader('./Data/products.json');
+tempData.writeDataToFile([new product("I1", 1, 1, 1, true), new product("I2", 1, 1, 2, true)], (e) => {
+    console.error(e);
+});
 
 
 // data
@@ -30,16 +33,18 @@ console.log("Config:", config);
 console.log("\n");
 
 // stack of robot tasks
-var stack = [];
+let stack: stack;
 
-var orders = [];
+var orders: order[] = [];
 var orderCounter = 0;
 
 try {
     // create server for webApp on port based on config file designation
-    http.createServer(function (request, response) {
-        pD.readProducts();
-        oD.readOrders();
+    http.createServer((request, response) => {
+        pD.readProducts((e) => {
+        });
+        oD.readOrders((e) => {
+        });
 
         // set content type
         response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5500')
@@ -49,7 +54,6 @@ try {
         } else {
             stackData.readDataFromFile(function (data) {
                 stack = data;
-                // console.log(stack);
             });
 
             // query url for params
@@ -77,7 +81,7 @@ try {
                                 if (query.order != null && query.order != undefined) {
                                     if (!checkForOrder(query.order)) {
                                         // order does not exist, create new order
-                                        var newOrder = new order(query.order);
+                                        var newOrder = new order(query.order, null);
                                         newOrder.post();
                                         newOrder.addProduct(returnedProduct);
 
@@ -86,10 +90,10 @@ try {
                                         orderCounter++;
                                         console.log("New Order Created");
                                     } else {
-                                        console.log(oD.getOrder(query.order))
+                                        console.log(oD.getOrder(Number(query.order)))
                                         console.log(returnedProduct)
                                         // order does exist, add product to order
-                                        oD.getOrder(query.order).addProduct(returnedProduct);
+                                        oD.getOrder(Number(query.order)).addProduct(returnedProduct);
                                     }
                                 } else {
                                     response.write(JSON.stringify({ error: '400 Order Not Given' }));
@@ -124,15 +128,15 @@ try {
                     response.end();
                 });
             } else if (query.operation == "signup") {
-                fs.readFile('./users.json', 'utf8', function (err, users) {
-                    users = JSON.parse(users);
+                fs.readFile('./users.json', 'utf8', function (err, output) {
+                    let users: user[] = JSON.parse(output);
                     // sign user up for new api key
                     if (!checkForUser(users, query.user)) {
                         var key = crypto.randomBytes(32).toString('hex')
                         users.push({ user: query.user, key: key });
                         var json = JSON.stringify(users);
                         // store user with corresponding key
-                        fs.writeFile('./users.json', json, 'utf8', function (err, data) { });
+                        fs.writeFile('./users.json', json, 'utf8', (err: any) => { });
                         console.log("User", query.user, "signed up for new key.");
                         response.write(JSON.stringify({ key: `${key}` }));
                     } else {

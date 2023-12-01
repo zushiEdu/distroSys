@@ -1,7 +1,14 @@
-class order {
-    constructor(id) {
+import { product } from './product';
+
+export class order {
+    id: number;
+    datePosted: number;
+    products: product[];
+    dateFulfilled: number;
+
+    constructor(id, datePosted) {
         this.id = id;
-        this.datePosted = null;
+        this.datePosted = datePosted;
         this.products = null;
     }
 
@@ -14,7 +21,7 @@ class order {
         this.datePosted = Date.now();
     }
 
-    addProduct(product) {
+    addProduct(product: product) {
         if (this.products == null || this.products == undefined) {
             this.products = [];
         }
@@ -38,5 +45,3 @@ class order {
         return this.id;
     }
 }
-
-module.exports = order;
