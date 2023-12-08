@@ -17,9 +17,8 @@ let oD = new orderData('./Data/orders.json');
 
 // orderData.writeDataToFile(new order(1, [new product("1", 1, 1, 1, true, 1), new product("2", 2, 2, 2, true, 2)]));
 
-
-let tempData = new reader('./Data/products.json');
-tempData.writeDataToFile([new product("I1", 1, 1, 1, true, 1), new product("I2", 1, 1, 2, true)]);
+// let tempData = new reader('./Data/products.json');
+// tempData.writeDataToFile([new product("I1", 1, 1, 1, true, 1), new product("I2", 1, 1, 2, true)], null);
 
 
 // data
@@ -32,7 +31,6 @@ console.log("\n");
 // stack of robot tasks
 var stack = [];
 
-var orders = [];
 var orderCounter = 0;
 
 try {
@@ -56,7 +54,7 @@ try {
             var query = url.parse(request.url, true).query;
             console.log("URL Query:", query);
             // change modes based on operation provided
-            if (query.operation == "request" || query.operation == "load") {
+            if (query.operation == "request" || query.operation == "load" || query.operation == "userCredit") {
                 fs.readFile('./Data/users.json', 'utf8', function (err, users) {
                     users = JSON.parse(users);
                     // verify user based on username and key
@@ -65,11 +63,15 @@ try {
                             var loadedProducts = pD.getProducts();
                             response.write(JSON.stringify(loadedProducts, null, 4));
                             console.log("Returned Catalog with", loadedProducts.length, "products in it.");
+                        } else if (query.operation == "userCredit") {
+                            response.write(JSON.stringify({ "credit": getCredit(users, query.user) }, null, 4));
+                            console.log("Returned Account Credit");
                         } else {
                             var returnedProduct = pD.getProduct(query.sku);
                             // look for sku in database, return object if sku is matching
                             if (returnedProduct != undefined) {
                                 // post product request
+                                var newTask = new task(query.sku, stack.counter);
 
                                 console.log("Returned Product", returnedProduct);
 
@@ -79,17 +81,17 @@ try {
                                         // order does not exist, create new order
                                         var newOrder = new order(query.order);
                                         newOrder.post();
-                                        newOrder.addProduct(returnedProduct);
+                                        newOrder.addProduct(newTask);
 
                                         oD.addOrder(newOrder);
 
                                         orderCounter++;
                                         console.log("New Order Created");
                                     } else {
-                                        console.log(oD.getOrder(query.order))
-                                        console.log(returnedProduct)
+                                        console.log(oD.getOrder(Number(query.order)));
+                                        console.log(returnedProduct);
                                         // order does exist, add product to order
-                                        oD.getOrder(query.order).addProduct(returnedProduct);
+                                        oD.getOrder(Number(query.order)).addProduct(newTask);
                                     }
                                 } else {
                                     response.write(JSON.stringify({ error: '400 Order Not Given' }));
@@ -97,13 +99,19 @@ try {
                                 }
 
                                 oD.writeDataToFile();
+                                pD.getProduct(query.sku).stock--;
+                                pD.writeDataToFile();
+
+                                console.log(users[matchUser(users, query.user)]);
+                                users[matchUser(users, query.user)].credit -= returnedProduct.price;
+                                fs.writeFile("./Data/users.json", JSON.stringify(users), 'utf8', (e) => {
+                                    console.log(e);
+                                });
 
                                 console.log(returnedProduct.getProductNumber);
                                 console.log("Returned product ID:", returnedProduct.getProductNumber());
                                 console.log("Operation:", query.operation, "product, dispatching bot.");
                                 // send signal to dispatch bot here by adding task to stack
-                                // console.log(pD.getProduct(query.sku).getLpn());
-                                var newTask = new task(query.sku, stack.counter);
                                 stack.stack.push(newTask);
                                 // console.log("Stack", stack);
                                 stack.counter++;
@@ -172,6 +180,24 @@ function verifyUser(users, username, key) {
         }
     }
     return false;
+}
+
+// get credit for user
+function getCredit(users, username) {
+    for (var i = 0; i < users.length; i++) {
+        if (users[i].user == username) {
+            return users[i].credit;
+        }
+    }
+}
+
+// get user index of username
+function matchUser(users, username) {
+    for (var i = 0; i < users.length; i++) {
+        if (users[i].user == username) {
+            return i;
+        }
+    }
 }
 
 function checkForOrder(number) {

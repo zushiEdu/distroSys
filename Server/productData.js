@@ -44,6 +44,11 @@ class productData {
             _callback;
         });
     }
+
+    writeDataToFile() {
+        console.log(productsList);
+        this.fR.writeDataToFile(productsList, null);
+    }
 }
 
 module.exports = productData;

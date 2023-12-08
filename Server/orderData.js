@@ -1,14 +1,16 @@
 var fileReader = require('./fileReading');
 var order = require('./order');
 
-var orders;
+let orders = [];
 
 class orderData {
     constructor(path) {
         this.fR = new fileReader(path);
 
         this.fR.readDataFromFile(function (returnedData) {
-            orders = returnedData;
+            if (returnedData != undefined) {
+                orders = returnedData;
+            }
         })
     }
 
@@ -19,9 +21,9 @@ class orderData {
     getOrder(id) {
         if (orders != null) {
             for (var i = 0; i < orders.length; i++) {
-                if (orders[0][i] != null) {
-                    console.log(orders[0][i].getId(), id);
-                    if (orders[0][i].getId() == id) {
+                if (orders[i] != null) {
+                    console.log(orders[i].getId(), id);
+                    if (orders[i].getId() == id) {
                         return orders[i];
                     }
                 }
@@ -49,8 +51,11 @@ class orderData {
             for (var i = 0; i < returnedData.length; i++) {
                 var o = returnedData[i];
 
-                var nO = new order(o.id, o.datePosted);
-                nO.addProduct(o.products);
+                var nO = new order(o.id);
+                for (var j = 0; j < o.products.length; j++) {
+                    nO.addProduct(o.products[j]);
+                }
+                nO.post();
                 tempData.push(nO);
             }
             orders = tempData;

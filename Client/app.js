@@ -1,11 +1,20 @@
 var vendingContent = this.document.getElementById("vendingContent");
+var body = this.document.getElementById("body");
 const rowAmount = 10;
 const colAmount = 5;
 
+var user = 'ehuber';
+var key = 'cd290b3330f20ab30f79d145eae869aecf61f32d2f63d6264e31128334584dfa';
+var port = 720;
+
 var loadedProducts = [];
 
-var accountCredit = 100;
-var accountNumber = genRandomAcctNum(381577, updateAccountProperties);
+var orderCounter = 0;
+
+// var accountNumber = genRandomAcctNum(381577, updateAccountProperties);
+var accountCredit;
+getCredit();
+var accountNumber = user;
 
 function genRandomAcctNum(seed, _callback) {
     accountNumber = Math.round(Math.random() * seed);
@@ -13,19 +22,26 @@ function genRandomAcctNum(seed, _callback) {
 }
 
 function updateAccountProperties() {
-    this.document.getElementById("accnum").textContent = "Account Num: " + accountNumber;
+    this.document.getElementById("accnum").textContent = "Account: " + accountNumber;
     this.document.getElementById("balance").textContent = "Balance: $" + Math.round(accountCredit * 100) / 100;
 }
 
-var user = 'ehuber';
-var key = 'cd290b3330f20ab30f79d145eae869aecf61f32d2f63d6264e31128334584dfa';
-var port = 720;
-
 fetch(`http://localhost:${port}/?&user=${user}&key=${key}&operation=load`)
-    .then(response => response.json())
-    .then(products => {
+    .then(response => {
+        if (response.ok) {
+            return response.json()
+        }
+    })
+    .then((products) => {
         loadedProducts = products;
         updateProducts();
+    }).catch((error) => {
+        var errorText = document.createElement('h3');
+        errorText.style = "margin:auto;background-color:white;text-align:center;border-radius:0.5em";
+        errorText.textContent = "500, Internal Server Error";
+        vendingContent.appendChild(errorText);
+        console.log("Could not get products");
+        console.log("Error...", error);
     });
 
 function updateProducts() {
@@ -77,16 +93,33 @@ function buttonLog(product) {
     if (accountCredit < loadedProducts[product].price) {
         return;
     }
+    if (loadedProducts[product].stock - 1 < 0) {
+        return;
+    }
 
-    console.log(loadedProducts[product]);
+    var sku = loadedProducts[product].productNumber
 
     // call for fetching of product
 
+    fetch(`http://localhost:${port}/?&user=${user}&key=${key}&sku=${sku}&order=${orderCounter}&operation=request`)
+        .then(response => response.json())
+        .then(products => {
+            requestedProduct = products;
+            console.log(requestedProduct);
+        });
 
-    // charge account
-    accountCredit -= loadedProducts[product].price;
-    loadedProducts[product].stock -= 1;
+    orderCounter++;
+    getCredit();
     updateAccountProperties();
     clearVendingContent();
     updateProducts();
+}
+
+function getCredit() {
+    fetch(`http://localhost:${port}/?&user=${user}&key=${key}&operation=userCredit`)
+        .then(response => response.json())
+        .then(credit => {
+            accountCredit = credit.credit;
+            updateAccountProperties();
+        });
 }
