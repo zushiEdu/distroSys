@@ -15,6 +15,16 @@ button{
     margin-top:1em;
     border-color: transparent;
     border-radius: 0.5em;
+    max-height: 2em;
+}
+
+input{
+    border-radius: 0.5em;
+    border-color: transparent;
+    margin-top: 1em;
+    max-height: 1em;
+    margin-left: .25em;
+    width: 6em;
 }
 
 .headerSection{

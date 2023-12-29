@@ -57,6 +57,10 @@ function updateProducts() {
                 var cellText = document.createElement('p');
                 cellText.textContent = `Dispense`;
                 var button = document.createElement('button');
+                var qtyForm = document.createElement("input");
+                qtyForm.setAttribute("type", "text");
+                qtyForm.setAttribute("id", `${oneDIndex}Form`);
+                qtyForm.setAttribute("placeholder", "Quantity");
                 var action = "buttonLog(" + oneDIndex + ");";
                 if (loadedProducts[oneDIndex] != undefined) {
                     var productDescText = document.createElement('p');
@@ -72,6 +76,7 @@ function updateProducts() {
                 button.setAttribute("onClick", action);
                 button.appendChild(cellText);
                 newCell.appendChild(button);
+                newCell.appendChild(qtyForm);
                 newRow.appendChild(newCell);
             }
             count++;
@@ -101,18 +106,23 @@ function buttonLog(product) {
 
     // call for fetching of product
 
-    fetch(`http://localhost:${port}/?&user=${user}&key=${key}&sku=${sku}&order=${orderCounter}&operation=request`)
-        .then(response => response.json())
-        .then(products => {
-            requestedProduct = products;
-            console.log(requestedProduct);
-        });
+    var qty = document.getElementById(`${product}Form`).value
+    if (qty == "") {
+        alert("No Quantity Provided");
+    } else {
+        fetch(`http://localhost:${port}/?&user=${user}&key=${key}&sku=${sku}&order=${orderCounter}&qty=${qty}&operation=request`)
+            .then(response => response.json())
+            .then(products => {
+                requestedProduct = products;
+                console.log(requestedProduct);
+            });
 
-    orderCounter++;
-    getCredit();
-    updateAccountProperties();
-    clearVendingContent();
-    updateProducts();
+        orderCounter++;
+        getCredit();
+        updateAccountProperties();
+        clearVendingContent();
+        updateProducts();
+    }
 }
 
 function getCredit() {

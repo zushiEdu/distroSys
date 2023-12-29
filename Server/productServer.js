@@ -6,20 +6,13 @@ const fs = require('fs');
 const productData = require('./productData');
 const orderData = require('./orderData');
 const order = require('./order');
-const product = require('./product');
 const task = require('./task');
-const reader = require('./fileReading');
+const stackData = require('./stackData');
 
 // modules
 let pD = new productData('./Data/products.json');
-let stackData = new reader('./Data/stack.json');
 let oD = new orderData('./Data/orders.json');
-
-// orderData.writeDataToFile(new order(1, [new product("1", 1, 1, 1, true, 1), new product("2", 2, 2, 2, true, 2)]));
-
-// let tempData = new reader('./Data/products.json');
-// tempData.writeDataToFile([new product("I1", 1, 1, 1, true, 1), new product("I2", 1, 1, 2, true)], null);
-
+let sD = new stackData('./Data/stack.json');
 
 // data
 var config = require("./Data/config.json");
@@ -38,6 +31,7 @@ try {
     http.createServer(function (request, response) {
         pD.readProducts();
         oD.readOrders();
+        sD.readTasks();
 
         // set content type
         response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5500')
@@ -45,11 +39,6 @@ try {
         if (request.url === '/favicon.ico') {
             // ignore favicon requests
         } else {
-            stackData.readDataFromFile(function (data) {
-                stack = data;
-                // console.log(stack);
-            });
-
             // query url for params
             var query = url.parse(request.url, true).query;
             console.log("URL Query:", query);
@@ -71,7 +60,7 @@ try {
                             // look for sku in database, return object if sku is matching
                             if (returnedProduct != undefined) {
                                 // post product request
-                                var newTask = new task(query.sku, stack.counter);
+                                var newTask = new task(query.sku, sD.getCount());
 
                                 console.log("Returned Product", returnedProduct);
 
@@ -81,7 +70,9 @@ try {
                                         // order does not exist, create new order
                                         var newOrder = new order(query.order);
                                         newOrder.post();
-                                        newOrder.addProduct(newTask);
+                                        for (var i = 0; i < query.qty; i++) {
+                                            newOrder.addProduct(newTask);
+                                        }
 
                                         oD.addOrder(newOrder);
 
@@ -91,7 +82,9 @@ try {
                                         console.log(oD.getOrder(Number(query.order)));
                                         console.log(returnedProduct);
                                         // order does exist, add product to order
-                                        oD.getOrder(Number(query.order)).addProduct(newTask);
+                                        for (var i = 0; i < query.qty; i++) {
+                                            oD.getOrder(Number(query.order)).addProduct(newTask);
+                                        }
                                     }
                                 } else {
                                     response.write(JSON.stringify({ error: '400 Order Not Given' }));
@@ -99,11 +92,11 @@ try {
                                 }
 
                                 oD.writeDataToFile();
-                                pD.getProduct(query.sku).stock--;
+                                pD.getProduct(query.sku).stock -= query.qty;
                                 pD.writeDataToFile();
 
                                 console.log(users[matchUser(users, query.user)]);
-                                users[matchUser(users, query.user)].credit -= returnedProduct.price;
+                                users[matchUser(users, query.user)].credit -= returnedProduct.price * query.qty;
                                 fs.writeFile("./Data/users.json", JSON.stringify(users), 'utf8', (e) => {
                                     console.log(e);
                                 });
@@ -112,10 +105,11 @@ try {
                                 console.log("Returned product ID:", returnedProduct.getProductNumber());
                                 console.log("Operation:", query.operation, "product, dispatching bot.");
                                 // send signal to dispatch bot here by adding task to stack
-                                stack.stack.push(newTask);
+                                for (var i = 0; i < query.qty; i++) {
+                                    sD.addTask(newTask);
+                                }
                                 // console.log("Stack", stack);
-                                stack.counter++;
-                                stackData.writeDataToFile(stack, null);
+                                sD.writeDataToFile();
                                 response.write(JSON.stringify(returnedProduct, null, 4));
                             } else {
                                 // send back 400 code and log error if sku is not found
