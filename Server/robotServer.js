@@ -25,22 +25,32 @@ try {
         if (request.url === '/favicon.ico') {
             // ignore favicon requests
         } else {
-            readDataFromFile('./stack.json', function (data) {
+            readDataFromFile('./Data/stack.json', function (data) {
                 stack = JSON.parse(data);
+                console.log("Stack:", stack);
             });
-            console.log(stack);
 
             // query url for params
             var query = url.parse(request.url, true).query;
             console.log("URL Query:", query);
             // change modes based on operation provided
             if (query.operation == "takeTask" || query.operation == "finishedTask") {
-                fs.readFile('./users.json', 'utf8', function (err, users) {
+                fs.readFile('./Data/users.json', 'utf8', function (err, users) {
                     users = JSON.parse(users);
                     // verify user based on username and key
                     if (verifyUser(users, query.user, query.key)) {
                         if (query.operation == "takeTask") {
-                            // take most recent task off of stack
+                            if (stack.stack.length == 0) {
+                                console.log("Cant take item from stack, stack is empty, waiting for task.");
+                                response.write(JSON.stringify({ error: "500, No items available to pull." }))
+                                response.end();
+                            } else {
+                                // take most recent task off of stack
+                                response.write(JSON.stringify(stack.stack[0], null, 4));
+                                stack.stack = stack.stack.slice(1);
+                                writeDataToFile('./Data/stack.json', JSON.stringify(stack), null);
+                                response.end();
+                            }
                         } else if (query.operation == "finishedTask") {
                             // mark order number as fulfilled
                         }
@@ -48,13 +58,14 @@ try {
                         // send back 401 code and log error if user is not authenticated
                         response.write(JSON.stringify({ error: '401 User not verified.' }));
                         console.log("Error 401 User not verified.");
+                        response.end();
                     }
-                    response.end();
                 });
 
             } else {
                 response.write(JSON.stringify({ error: '406 invalid query.' }));
                 console.log("Error 406 invalid query.");
+                response.end();
             }
         }
         console.log("--------------------");
