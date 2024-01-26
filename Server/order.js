@@ -1,8 +1,8 @@
 class order {
-    constructor(id) {
+    constructor(id, datePosted, products) {
         this.id = id;
-        this.datePosted = null;
-        this.products = null;
+        this.datePosted = datePosted;
+        this.products = products;
     }
 
     fulfill() {

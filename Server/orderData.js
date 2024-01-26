@@ -6,12 +6,6 @@ let orders = [];
 class orderData {
     constructor(path) {
         this.fR = new fileReader(path);
-
-        this.fR.readDataFromFile(function (returnedData) {
-            if (returnedData != undefined) {
-                orders = returnedData;
-            }
-        })
     }
 
     addOrder(order) {
@@ -44,23 +38,10 @@ class orderData {
 
     readOrders(_callback) {
         this.fR.readDataFromFile(function (returnedData) {
-            var tempData = [];
-            if (returnedData == undefined) {
-                returnedData = [];
-            }
-            for (var i = 0; i < returnedData.length; i++) {
-                var o = returnedData[i];
-
-                var nO = new order(o.id);
-                for (var j = 0; j < o.products.length; j++) {
-                    nO.addProduct(o.products[j]);
+            if (returnedData != "") {
+                for (var i = 0; i < returnedData.length; i++) {
+                    orders[i] = new order(returnedData[i].id, returnedData[i].datePosted, returnedData[i].products);
                 }
-                nO.post();
-                tempData.push(nO);
-            }
-            orders = tempData;
-            if (_callback != null) {
-                _callback;
             }
         });
     }

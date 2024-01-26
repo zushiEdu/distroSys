@@ -6,6 +6,7 @@ const fs = require('fs');
 const productData = require('./productData');
 const orderData = require('./orderData');
 const order = require('./order');
+const stack = require('./stack');
 const task = require('./task');
 const stackData = require('./stackData');
 
@@ -20,9 +21,6 @@ var config = require("./Data/config.json");
 // log config
 console.log("Config:", config);
 console.log("\n");
-
-// stack of robot tasks
-var stack = [];
 
 var orderCounter = 0;
 
@@ -60,7 +58,7 @@ try {
                             // look for sku in database, return object if sku is matching
                             if (returnedProduct != undefined) {
                                 // post product request
-                                var newTask = new task(query.sku, sD.getCount());
+                                // var newTask = new task(query.sku, sD.getCount());
 
                                 console.log("Returned Product", returnedProduct);
 
@@ -71,7 +69,7 @@ try {
                                         var newOrder = new order(query.order);
                                         newOrder.post();
                                         for (var i = 0; i < query.qty; i++) {
-                                            newOrder.addProduct(newTask);
+                                            newOrder.addProduct(new task(query.sku, sD.getCount() + i));
                                         }
 
                                         oD.addOrder(newOrder);
@@ -83,7 +81,9 @@ try {
                                         console.log(returnedProduct);
                                         // order does exist, add product to order
                                         for (var i = 0; i < query.qty; i++) {
-                                            oD.getOrder(Number(query.order)).addProduct(newTask);
+                                            console.log("Here 2", i);
+                                            console.log("Here", sD.getCount());
+                                            oD.getOrder(Number(query.order)).addProduct(new task(query.sku, sD.getCount() + i));
                                         }
                                     }
                                 } else {
@@ -106,7 +106,7 @@ try {
                                 console.log("Operation:", query.operation, "product, dispatching bot.");
                                 // send signal to dispatch bot here by adding task to stack
                                 for (var i = 0; i < query.qty; i++) {
-                                    sD.addTask(newTask);
+                                    sD.addTask(new task(query.sku, sD.getCount() + i));
                                 }
                                 // console.log("Stack", stack);
                                 sD.writeDataToFile();

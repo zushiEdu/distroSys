@@ -3,8 +3,11 @@ var body = this.document.getElementById("body");
 const rowAmount = 10;
 const colAmount = 5;
 
+var hasLoggedIn = false;
+
 var user = 'ehuber';
 var key = 'cd290b3330f20ab30f79d145eae869aecf61f32d2f63d6264e31128334584dfa';
+
 var port = 720;
 
 var loadedProducts = [];
@@ -22,8 +25,13 @@ function genRandomAcctNum(seed, _callback) {
 }
 
 function updateAccountProperties() {
-    this.document.getElementById("accnum").textContent = "Account: " + accountNumber;
-    this.document.getElementById("balance").textContent = "Balance: $" + Math.round(accountCredit * 100) / 100;
+    if (hasLoggedIn) {
+        this.document.getElementById("accnum").textContent = "Account: " + accountNumber;
+        this.document.getElementById("balance").textContent = "Balance: $" + Math.round(accountCredit * 100) / 100;
+    } else {
+        this.document.getElementById("accnum").textContent = "Please Log In To View Account Details"
+        this.document.getElementById("balance").textContent = ""
+    }
 }
 
 fetch(`http://localhost:${port}/?&user=${user}&key=${key}&operation=load`)
@@ -81,7 +89,30 @@ function updateProducts() {
             }
             count++;
         }
-        vendingContent.appendChild(newRow);
+        if (hasLoggedIn) {
+            vendingContent.appendChild(newRow);
+        }
+    }
+
+    if (!hasLoggedIn) {
+        var userName = document.createElement("input");
+        var key = document.createElement("input");
+        var loginButton = document.createElement("button");
+
+        userName.setAttribute("type", "text");
+        userName.setAttribute("id", `usernameForm`);
+        userName.setAttribute("placeholder", "Username");
+
+        key.setAttribute("type", "text");
+        key.setAttribute("id", `keyForm`);
+        key.setAttribute("placeholder", "Key");
+
+        var loginAction = "verifyLogin()";
+        button.setAttribute("onClick", loginAction);
+        button.appendChild(cellText);
+        vendingContent.appendChild(userName);
+        vendingContent.appendChild(key);
+        vendingContent.appendChild(loginButton);
     }
 }
 

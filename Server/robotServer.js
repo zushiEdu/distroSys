@@ -8,7 +8,7 @@ var fs = require('fs');
 var product = require('./productData')
 
 // data
-var config = require("./config.json");
+var config = require("./Data/config.json");
 
 // log config
 console.log("Config:", config);

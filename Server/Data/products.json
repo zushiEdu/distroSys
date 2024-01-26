@@ -1,16 +1,16 @@
 [
-    {
-        "productDescription": "I1",
-        "stock": 28,
-        "price": 1,
-        "productNumber": 1,
-        "display": true
-    },
-    {
-        "productDescription": "I2",
-        "stock": 560,
-        "price": 1,
-        "productNumber": 2,
-        "display": true
-    }
+  {
+    "productDescription": "Item 1",
+    "stock": 20,
+    "price": 1,
+    "productNumber": 1,
+    "display": true
+  },
+  {
+    "productDescription": "Item 2",
+    "stock": 450,
+    "price": 1,
+    "productNumber": 2,
+    "display": true
+  }
 ]

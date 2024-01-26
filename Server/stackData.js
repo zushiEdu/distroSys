@@ -1,7 +1,7 @@
 var fileReader = require('./fileReading');
 var Stack = require('./stack');
 
-let stack = [];
+let stack;
 
 class stackData {
     constructor(path) {
@@ -15,8 +15,8 @@ class stackData {
     }
 
     addTask(task) {
+        stack.getCount()
         stack.addTask(task);
-        stack.raiseCounter(1);
     }
 
     getCount() {
@@ -25,19 +25,7 @@ class stackData {
 
     readTasks(_callback) {
         this.fR.readDataFromFile(function (returnedData) {
-            if (returnedData == undefined || returnedData.length == 0) {
-                returnedData = new Stack();
-            }
-
-            var nS = new Stack();
-            nS.setCounter(returnedData.counter);
-            for (var i = 0; i < returnedData.stack.length; i++) {
-                nS.addTask(returnedData.stack[i]);
-            }
-            stack = nS;
-            if (_callback != null) {
-                _callback;
-            }
+            stack = new Stack(returnedData.counter, returnedData.stack);
         });
     }
 

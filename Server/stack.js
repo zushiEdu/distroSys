@@ -1,7 +1,7 @@
 class stack {
-    constructor() {
-        this.counter = 0;
-        this.stack = [];
+    constructor(counter, stack) {
+        this.counter = counter;
+        this.stack = stack;
     }
 
     addTask(task) {
