@@ -1,4 +1,17 @@
 {
-  "counter": 0,
-  "stack": []
+    "counter": 0,
+    "stack": [
+        {
+            "sku": "2",
+            "lpn": 0
+        },
+        {
+            "sku": "2",
+            "lpn": 0
+        },
+        {
+            "sku": "1",
+            "lpn": 0
+        }
+    ]
 }

@@ -95,6 +95,9 @@ function updateProducts() {
     }
 
     if (!hasLoggedIn) {
+        var div = document.createElement('div');
+        div.style = "margin:auto;background-color:rgb(46, 46, 51);text-align:center;border-radius:0.5em;padding-bottom:1em";
+
         var userName = document.createElement("input");
         var key = document.createElement("input");
         var loginButton = document.createElement("button");
@@ -106,14 +109,34 @@ function updateProducts() {
         key.setAttribute("type", "text");
         key.setAttribute("id", `keyForm`);
         key.setAttribute("placeholder", "Key");
+        key.setAttribute("style", "width:40em");
+
 
         var loginAction = "verifyLogin()";
-        button.setAttribute("onClick", loginAction);
-        button.appendChild(cellText);
-        vendingContent.appendChild(userName);
-        vendingContent.appendChild(key);
-        vendingContent.appendChild(loginButton);
+        loginButton.setAttribute("onClick", loginAction);
+        var buttonText = document.createElement('p');
+        buttonText.textContent = "Login";
+        loginButton.appendChild(buttonText);
+        div.appendChild(loginButton);
+        div.appendChild(userName);
+        div.appendChild(key);
+        vendingContent.appendChild(div);
     }
+}
+
+function verifyLogin() {
+    var attemptedUser = document.getElementById("usernameForm").value;
+    var attemptedKey = document.getElementById("keyForm").value;
+
+    fetch(`http://localhost:${port}/?&user=${attemptedUser}&key=${attemptedKey}&operation=verifyUser`)
+        .then(response => response.json())
+        .then(response => {
+            console.log(response);
+            hasLoggedIn = response.status;
+            clearVendingContent();
+            updateProducts();
+            updateAccountProperties();
+        });
 }
 
 function clearVendingContent() {

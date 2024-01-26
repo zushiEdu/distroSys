@@ -53,7 +53,7 @@ try {
                         } else if (query.operation == "userCredit") {
                             response.write(JSON.stringify({ "credit": getCredit(users, query.user) }, null, 4));
                             console.log("Returned Account Credit");
-                        } else {
+                        } else if (query.operation == "request") {
                             var returnedProduct = pD.getProduct(query.sku);
                             // look for sku in database, return object if sku is matching
                             if (returnedProduct != undefined) {
@@ -120,6 +120,7 @@ try {
                         }
                     } else {
                         // send back 401 code and log error if user is not authenticated
+                        response.statusCode = 401;
                         response.write(JSON.stringify({ error: '401 User not verified.' }));
                         console.log("Error 401 User not verified.");
                     }
@@ -142,10 +143,28 @@ try {
                         response.write(JSON.stringify({ error: '403 user already exists.' }));
                         console.log("Error 403 user already exists.");
                     }
+                    response.end();
                 });
-            } else {
+            } else if (query.operation == "verifyUser") {
+                fs.readFile('./Data/users.json', 'utf8', function (err, users) {
+                    users = JSON.parse(users);
+                    if (!verifyUser(users, query.user, query.key)) {
+                        response.statusCode = 401;
+                        response.write(JSON.stringify({ message: '401 User not verified.', status: false }, null, 4));
+                        console.log("Error 401 User not verified.");
+                        response.end();
+                    } else {
+                        response.statusCode = 200;
+                        response.write(JSON.stringify({ message: '200 User verified.', status: true }, null, 4));
+                        console.log("User verified.");
+                        response.end();
+                    }
+                });
+            }
+            else {
                 response.write(JSON.stringify({ error: '406 invalid query.' }));
                 console.log("Error 406 invalid query.");
+                response.end();
             }
         }
         console.log("--------------------");
